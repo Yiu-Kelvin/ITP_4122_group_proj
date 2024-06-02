@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "pv-claim"
+spec:
+  storageClassName: gp2
+  accessModes:
+  - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "500M"
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: "pv-volume"
+spec:
+  storageClassName: gp2
+  capacity:
+    storage: "500M"
+  accessModes:
+    - "ReadWriteOnce"
+  hostPath:
+    path: "/mnt/data"
