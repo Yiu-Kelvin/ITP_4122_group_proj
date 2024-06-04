@@ -1,0 +1,33 @@
+moodleUsername: "${app_username}"
+moodlePassword: "${app_password}"
+allowEmptyPassword: false
+global:
+  storageClass: "efs-sc"
+mariadb:
+  enabled: false
+persistence:
+  enabled: true
+  accessMode: ReadWriteMany
+  existingClaim: efs-claim 
+
+image:
+  debug: true
+
+externalDatabase:
+  type: auroramysql
+  host: "${db_endpoint}"
+  user: "${db_username}"
+  password: "${db_password}"
+  database: "${db_name}"
+# extraVolumes:
+#   - name: efs-claim
+#     hostPath:
+#       path: ./plugin/auth/moodle-auth_saml2
+# extraVolumeMounts:
+#   - name: efs-claim
+#     mountPath: /bitnami/moodle/auth/saml2
+image:
+  registry: docker.io
+  repository: bitnami/moodle
+  pullPolicy: IfNotPresent
+  debug: true

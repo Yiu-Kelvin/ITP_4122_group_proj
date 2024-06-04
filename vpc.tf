@@ -1,94 +1,84 @@
-# resource "aws_vpc" "main" {
-#   cidr_block = "10.0.0.0/16"
-# }
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "~> 4.0"
 
-# resource "aws_subnet" "public_a" {
-#   vpc_id     = aws_vpc.main.id
-#   cidr_block = "10.0.0.0/24"
+  name = var.vpc_name
+  cidr = var.vpc_cidr
 
-#   availability_zone = "us-east-1a"
+  azs             = var.vpc_azs
+  private_subnets = var.subnets.private_subnets
+  public_subnets  = var.subnets.public_subnets
+  intra_subnets   = var.subnets.intra_subnets
 
-#   tags = {
-#     Name = "Public Subnet A"
-#   }
-# }
+  enable_nat_gateway = true
 
-# resource "aws_subnet" "public_b" {
-#   vpc_id     = aws_vpc.main.id
-#   cidr_block = "10.0.1.0/24"
+  public_subnet_tags = {
+    "kubernetes.io/role/elb" = 1
+  }
 
-#   availability_zone = "us-east-1b"
-
-#   tags = {
-#     Name = "Public Subnet B"
-#   }
-# }
-
-# resource "aws_subnet" "private_a" {
-#   vpc_id     = aws_vpc.main.id
-#   cidr_block = "10.0.4.0/22"
-
-#   availability_zone = "us-east-1a"
-
-#   tags = {
-#     Name = "Private Subnet A"
-#   }
-# }
-
-# resource "aws_subnet" "private_b" {
-#   vpc_id     = aws_vpc.main.id
-#   cidr_block = "10.0.8.0/22"
-
-#   availability_zone = "us-east-1b"
-
-#   tags = {
-#     Name = "Private Subnet B"
-#   }
-# }
+  private_subnet_tags = {
+    "kubernetes.io/role/internal-elb" = 1
+  }
+}
 
 
-# resource "aws_internet_gateway" "igw" {
-#   vpc_id = aws_vpc.main.id
-# }
+resource "aws_security_group" "allow_efs" {
+  name        = "allow_tls"
+  description = "allows inbound network file system (NFS) traffic for Amazon EFS mount points"
+  vpc_id      = module.vpc.vpc_id
+
+  tags = {
+    Name = "allow_efs"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_efs_all_ingress" {
+  security_group_id = aws_security_group.allow_efs.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1"
+}
 
 
-# resource "aws_route_table" "public_route_table" {
-#   vpc_id = aws_vpc.main.id
+resource "aws_vpc_security_group_egress_rule" "allow_efs_all_egress" {
+  security_group_id = aws_security_group.allow_efs.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1" # semantically equivalent to all ports
+}
 
-#   route {
-#     cidr_block = "10.0.0.0/16"
-#     gateway_id = "local"
-#   }
 
-#   route {
-#     cidr_block = "0.0.0.0/0"
-#     gateway_id = aws_internet_gateway.igw.id
-#   }
-# }
-# resource "aws_route_table" "private_route_table" {
-#   vpc_id = aws_vpc.main.id
+resource "aws_security_group" "rds_sg" {
+  name        = "rds_sg"
+  description = "Security group for RDS"
+  vpc_id      = module.vpc.vpc_id
+  tags = {
+    Name = "rds_sg"
+  }
+}
 
-#   route {
-#     cidr_block = "10.0.0.0/16"
-#     gateway_id = "local"
-#   }
-# }
-# resource "aws_route_table_association" "private_a" {
-#   subnet_id      = aws_subnet.private_a.id
-#   route_table_id = aws_route_table.private_route_table.id
-# }
+resource "aws_security_group_rule" "rds_sg_ingress" {
+  type                     = "ingress"
+  from_port                = 3306
+  to_port                  = 3306
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.rds_sg.id
+  source_security_group_id = module.eks.node_security_group_id
+}
 
-# resource "aws_route_table_association" "private_b" {
-#   subnet_id      = aws_subnet.private_b.id
-#   route_table_id = aws_route_table.private_route_table.id
-# }
 
-# resource "aws_route_table_association" "public_a" {
-#   subnet_id      = aws_subnet.public_a.id
-#   route_table_id = aws_route_table.public_route_table.id
-# }
+resource "aws_security_group_rule" "rds_sg_egress" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  security_group_id = aws_security_group.rds_sg.id
+  cidr_blocks       = ["0.0.0.0/0"]
+}
 
-# resource "aws_route_table_association" "public_b" {
-#   subnet_id      = aws_subnet.public_b.id
-#   route_table_id = aws_route_table.public_route_table.id
-# }
+resource "aws_vpc_security_group_ingress_rule" "cluster_rds_ingress" {
+  security_group_id = module.eks.node_security_group_id
+
+  from_port   = 3306
+  to_port     = 3306
+  ip_protocol    = "tcp"
+  referenced_security_group_id = aws_security_group.rds_sg.id
+}
