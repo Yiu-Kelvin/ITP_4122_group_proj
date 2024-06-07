@@ -104,7 +104,7 @@ metadata:
 provisioner: efs.csi.aws.com
 YAML
 
-depends_on = [ aws_eks_access_entry.access_entry ]
+depends_on = [ aws_eks_access_entry.access_entry, module.eks ]
 }
 
 resource "kubectl_manifest" "efs_pv" {
@@ -126,7 +126,7 @@ spec:
     volumeHandle: ${aws_efs_file_system.moodle-volume.id}
 YAML
 
-  depends_on = [kubectl_manifest.efs_storage_class]
+  depends_on = [kubectl_manifest.efs_storage_class, module.eks]
 }
 
 
@@ -144,12 +144,26 @@ spec:
     requests:
       storage: 5Gi
 YAML
-  depends_on = [kubectl_manifest.efs_storage_class, kubectl_manifest.efs_pv]
+  depends_on = [kubectl_manifest.efs_storage_class, kubectl_manifest.efs_pv, module.eks]
 }
+
+resource "kubectl_manifest" "ingressClass" {
+  yaml_body = <<YAML
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: ingress-class
+spec:
+  controller: ingress.k8s.aws/alb  
+YAML
+depends_on = [ module.eks ]
+}
+
 resource "helm_release" "latest" {
-  name       = "latests"
+  name       = "latest"
   repository = "oci://registry-1.docker.io/bitnamicharts"
   chart      = "moodle"
+  timeout = 600
   values = [templatefile("values.yaml", {
     app_username = "admin"
     app_password = "aA!12345678"
@@ -159,5 +173,5 @@ resource "helm_release" "latest" {
     db_name      = "school_database"
   })]
 
-depends_on = [kubectl_manifest.efs_pvc]
+depends_on = [kubectl_manifest.efs_pvc, module.eks]
 }

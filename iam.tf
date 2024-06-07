@@ -19,7 +19,7 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSFargatePodExecutionRolePolic
 }
 
 resource "aws_iam_policy" "csi_iam_policy" {
-  policy = file("csi_iam_policy.json")
+  policy = file("./policies/csi_iam_policy.json")
 }
 
 resource "aws_iam_role" "AmazonEKS_EFS_CSI_DriverRole" {
@@ -42,3 +42,8 @@ resource "aws_iam_role_policy_attachment" "csi_iam_policy_attatch" {
   policy_arn = aws_iam_policy.csi_iam_policy.arn
   role       = aws_iam_role.AmazonEKS_EFS_CSI_DriverRole.name
 }
+
+resource "aws_iam_policy" "AWSLoadBalancerControllerIAMPolicy" {
+  policy = file("./policies/lb_iam_policy.json")
+}
+

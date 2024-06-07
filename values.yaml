@@ -5,11 +5,14 @@ global:
   storageClass: "efs-sc"
 mariadb:
   enabled: false
+volumePermissions:
+  enabled: true
 persistence:
   enabled: true
   accessMode: ReadWriteMany
   existingClaim: efs-claim 
-
+# args: ["-c", "while true; do echo $(date -u) >> /bitnami/moodle/out1.txt; sleep 5; done"]
+# command: ["/bin/bash"]
 image:
   debug: true
 
@@ -19,15 +22,23 @@ externalDatabase:
   user: "${db_username}"
   password: "${db_password}"
   database: "${db_name}"
-# extraVolumes:
-#   - name: efs-claim
-#     hostPath:
-#       path: ./plugin/auth/moodle-auth_saml2
-# extraVolumeMounts:
-#   - name: efs-claim
-#     mountPath: /bitnami/moodle/auth/saml2
+
 image:
   registry: docker.io
   repository: bitnami/moodle
   pullPolicy: IfNotPresent
   debug: true
+
+service:
+  type: ClusterIP
+  # annotations: 
+  #   service.beta.kubernetes.io/aws-load-balancer-type: alb
+
+ingress:
+  enabled: true
+  hostname: "school.pikaamail.com"
+  tls: false
+  ingressClassName: alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
