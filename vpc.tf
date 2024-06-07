@@ -56,13 +56,13 @@ resource "aws_security_group" "rds_sg" {
 }
 
 resource "aws_security_group_rule" "rds_sg_ingress" {
-  type                     = "ingress"
-  from_port                = 3306
-  to_port                  = 3306
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.rds_sg.id
+  type              = "ingress"
+  from_port         = 3306
+  to_port           = 3306
+  protocol          = "tcp"
+  security_group_id = aws_security_group.rds_sg.id
   # source_security_group_id = module.eks.node_security_group_id
-  cidr_blocks       = ["0.0.0.0/0"]
+  cidr_blocks = ["0.0.0.0/0"]
 }
 
 
@@ -78,8 +78,8 @@ resource "aws_security_group_rule" "rds_sg_egress" {
 resource "aws_vpc_security_group_ingress_rule" "cluster_rds_ingress" {
   security_group_id = module.eks.node_security_group_id
 
-  from_port   = 3306
-  to_port     = 3306
-  ip_protocol    = "tcp"
+  from_port                    = 3306
+  to_port                      = 3306
+  ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.rds_sg.id
 }

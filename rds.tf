@@ -14,9 +14,9 @@ resource "aws_rds_cluster" "school_db" {
   db_subnet_group_name   = aws_db_subnet_group.main.name
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
 
-  master_username         = "admin"
-  master_password         = "school_password"
-  database_name           = "school_database"
+  master_username = "admin"
+  master_password = "school_password"
+  database_name   = "school_database"
   serverlessv2_scaling_configuration {
     max_capacity = 1.0
     min_capacity = 0.5
