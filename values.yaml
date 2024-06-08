@@ -37,9 +37,11 @@ service:
 ingress:
   enabled: true
   hostname: "school.pikaamail.com"
-  tls: false
+  resourcePreset: large
+  tls: true
   ingressClassName: alb
   path: /*
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/certificate-arn: ${certificate_arn}

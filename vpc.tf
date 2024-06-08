@@ -9,7 +9,7 @@ module "vpc" {
   private_subnets = var.subnets.private_subnets
   public_subnets  = var.subnets.public_subnets
   intra_subnets   = var.subnets.intra_subnets
-
+  single_nat_gateway = true
   enable_nat_gateway = true
 
   public_subnet_tags = {

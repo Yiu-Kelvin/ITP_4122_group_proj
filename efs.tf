@@ -4,9 +4,7 @@ resource "aws_efs_file_system" "moodle-volume" {
   tags = {
     Name = "moodleVolume"
   }
-  lifecycle {
-    prevent_destroy = true
-  }
+
 }
 
 resource "aws_efs_mount_target" "moodle-volume-aws_efs_mount_target-a" {

@@ -24,7 +24,8 @@ metadata:
 provisioner: efs.csi.aws.com
 YAML
 
-  depends_on = [aws_eks_access_entry.access_entry, module.eks]
+  depends_on = [aws_eks_access_entry.access_entry, module.eks, 
+  aws_eks_access_policy_association.admin, aws_eks_access_policy_association.cluster_admin, aws_eks_access_entry.access_entry]
 }
 
 resource "kubectl_manifest" "efs_pv" {
@@ -46,7 +47,8 @@ spec:
     volumeHandle: ${aws_efs_file_system.moodle-volume.id}
 YAML
 
-  depends_on = [kubectl_manifest.efs_storage_class, module.eks]
+  depends_on = [kubectl_manifest.efs_storage_class, module.eks, 
+  aws_eks_access_policy_association.admin, aws_eks_access_policy_association.cluster_admin, aws_eks_access_entry.access_entry]
 }
 
 
@@ -64,21 +66,26 @@ spec:
     requests:
       storage: 5Gi
 YAML
-  depends_on = [kubectl_manifest.efs_storage_class, kubectl_manifest.efs_pv, module.eks]
+  depends_on = [kubectl_manifest.efs_storage_class, kubectl_manifest.efs_pv, module.eks, 
+  aws_eks_access_policy_association.admin, aws_eks_access_policy_association.cluster_admin, aws_eks_access_entry.access_entry]
 }
 
 resource "kubectl_manifest" "cluster_role" {
     yaml_body = file("${path.root}/rbac/clusterRole.yaml")
+  depends_on = [ aws_eks_access_policy_association.admin, aws_eks_access_policy_association.cluster_admin, aws_eks_access_entry.access_entry ]
 }
 
 resource "kubectl_manifest" "cluster_role_binding" {
     yaml_body = file("${path.root}/rbac/clusterRoleBinding.yaml")
+  depends_on = [ aws_eks_access_policy_association.admin, aws_eks_access_policy_association.cluster_admin, aws_eks_access_entry.access_entry ]
 }
 
 resource "kubectl_manifest" "alb_ingress_controller_service_account" {
   yaml_body = templatefile("${path.root}/rbac/serviceAccount.yaml", {
     alb_ingress_controller_iam_role_arn = "${aws_iam_role.ALBIngressControllerRole.arn}"
   })
+  
+  depends_on = [ aws_eks_access_policy_association.admin, aws_eks_access_policy_association.cluster_admin, aws_eks_access_entry.access_entry ]
 }
 
 
@@ -92,7 +99,8 @@ metadata:
 spec:
   controller: ingress.k8s.aws/alb  
 YAML
-  depends_on = [module.eks]
+  depends_on = [module.eks, 
+  aws_eks_access_policy_association.admin, aws_eks_access_policy_association.cluster_admin, aws_eks_access_entry.access_entry]
 }
 resource "helm_release" "aws-load-balancer-controller" {
     name       = "aws-load-balancer-controller"
@@ -122,7 +130,8 @@ resource "helm_release" "aws-load-balancer-controller" {
         value = module.vpc.vpc_id
     }
 
-    depends_on = [kubectl_manifest.alb_ingress_controller_service_account, kubectl_manifest.ingressClass, module.eks]
+    depends_on = [kubectl_manifest.alb_ingress_controller_service_account, kubectl_manifest.ingressClass, module.eks, 
+  aws_eks_access_policy_association.admin, aws_eks_access_policy_association.cluster_admin, aws_eks_access_entry.access_entry]
 }
 
 resource "helm_release" "latest" {
@@ -137,7 +146,9 @@ resource "helm_release" "latest" {
     db_username  = "admin"
     db_password  = "school_password"
     db_name      = "school_database"
+    certificate_arn = "${aws_acm_certificate.cert.arn}"
   })]
 
-  depends_on = [kubectl_manifest.efs_pvc, module.eks]
+  depends_on = [kubectl_manifest.efs_pvc, module.eks, 
+  aws_eks_access_policy_association.admin, aws_eks_access_policy_association.cluster_admin, aws_eks_access_entry.access_entry]
 }
