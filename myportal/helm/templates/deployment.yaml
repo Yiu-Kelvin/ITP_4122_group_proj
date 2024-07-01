@@ -1,0 +1,58 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myportal
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: myportal
+  template:
+    metadata:
+      labels:
+        app: myportal
+    spec:
+      containers:
+      - name: myportal
+        image: yiukelvin2005/myportal:latest
+        env:
+          - name: MICRO_CLIENT_ID
+            valueFrom:
+              configMapKeyRef:
+                name: {{.Release.Name }}-configmap
+                key: MICRO_CLIENT_ID
+                
+          - name: MICRO_CLIENT_SECRET
+            valueFrom:
+              configMapKeyRef:
+                name: {{.Release.Name }}-configmap
+                key: MICRO_CLIENT_SECRET
+                
+          - name: SQLALCHEMY_DATABASE_URI
+            valueFrom:
+              configMapKeyRef:
+                name: {{.Release.Name }}-configmap
+                key: SQLALCHEMY_DATABASE_URI
+                
+          - name: DEBUG
+            valueFrom:
+              configMapKeyRef:
+                name: {{.Release.Name }}-configmap
+                key: DEBUG
+          - name: REDIRECT_URL
+            valueFrom:
+              configMapKeyRef:
+                name: {{.Release.Name }}-configmap
+                key: REDIRECT_URL
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: web
+          containerPort: 5000
+        resources:
+          requests:
+            memory: 256Mi
+            cpu: 250m
+          limits:
+            memory: 256Mi
+            cpu: 250m

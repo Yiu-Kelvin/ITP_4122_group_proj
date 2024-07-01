@@ -44,7 +44,7 @@ spec:
   storageClassName: efs-sc
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: ${aws_efs_file_system.moodle-volume.id}
+    volumeHandle: ${var.efs_id}
 YAML
 
   depends_on = [kubectl_manifest.efs_storage_class, module.eks, 
@@ -140,13 +140,32 @@ resource "helm_release" "latest" {
   chart      = "moodle"
   timeout    = 600
   values = [templatefile("values.yaml", {
-    app_username = "admin"
-    app_password = "aA!12345678"
+    app_username = "${var.app_username}"
+    app_password = "${var.app_password}"
     db_endpoint  = "${aws_rds_cluster.school_db.endpoint}"
-    db_username  = "admin"
-    db_password  = "school_password"
-    db_name      = "school_database"
+    db_username  = "${var.db_username}"
+    db_password  = "${var.db_password}"
+    db_name      = "${var.db_name}"
     certificate_arn = "${aws_acm_certificate.cert.arn}"
+  })]
+
+  depends_on = [kubectl_manifest.efs_pvc, module.eks, 
+  aws_eks_access_policy_association.admin, aws_eks_access_policy_association.cluster_admin, aws_eks_access_entry.access_entry]
+}
+
+
+resource "helm_release" "myportal" {
+  name       = "myportal"
+  repository = "oci://registry-1.docker.io/yiukelvin2005"
+  chart      = "myportal_chart"
+  timeout    = 600
+  values = [templatefile("myportal_value.yaml", {
+    db_endpoint  = "${aws_rds_cluster.school_db.endpoint}"
+    db_username  = "${var.db_username}"
+    db_password  = "${var.db_password}"
+    db_name      = "${var.db_name}"
+    MICRO_CLIENT_ID = "${var.MICRO_CLIENT_ID}"
+    MICRO_CLIENT_SECRET = "${var.MICRO_CLIENT_SECRET}"
   })]
 
   depends_on = [kubectl_manifest.efs_pvc, module.eks, 

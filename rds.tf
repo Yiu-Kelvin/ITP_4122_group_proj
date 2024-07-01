@@ -1,7 +1,7 @@
-# data "aws_db_cluster_snapshot" "snapshot" {
-#   db_cluster_identifier = "school-db"
-#   most_recent           = true
-# }
+data "aws_db_cluster_snapshot" "snapshot" {
+  db_cluster_identifier = "the-school-db"
+  most_recent           = true
+}
 
 resource "aws_rds_cluster" "school_db" {
   cluster_identifier     = "the-school-db"
@@ -14,14 +14,19 @@ resource "aws_rds_cluster" "school_db" {
   db_subnet_group_name   = aws_db_subnet_group.main.name
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
 
-  master_username = "admin"
-  master_password = "school_password"
-  database_name   = "school_database"
+  master_password = var.db_password
+  master_username = var.db_username
+  database_name = var.db_name
+
+  snapshot_identifier = data.aws_db_cluster_snapshot.snapshot.id
   serverlessv2_scaling_configuration {
     max_capacity = 1.0
     min_capacity = 0.5
   }
-
+  lifecycle {
+    create_before_destroy = true
+  
+  }
 
 }
 

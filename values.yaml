@@ -33,11 +33,11 @@ service:
   type: ClusterIP
   # annotations: 
   #   service.beta.kubernetes.io/aws-load-balancer-type: alb
-
+resourcePreset: large
+replicaCount: 3
 ingress:
   enabled: true
   hostname: "school.pikaamail.com"
-  resourcePreset: large
   tls: true
   ingressClassName: alb
   path: /*
@@ -45,3 +45,19 @@ ingress:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/certificate-arn: ${certificate_arn}
+  extraRules:
+    - host: "myportal.pikaamail.com"
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: myportal-service
+              port:
+                number: 443
+readinessProbe:
+  enabled: false
+
+livenessProbe:
+  enabled: false

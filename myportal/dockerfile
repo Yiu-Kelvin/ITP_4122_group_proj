@@ -1,0 +1,9 @@
+FROM python:3.9.18-slim-bookworm
+
+COPY requirements.txt /tmp/pip-tmp/
+COPY . /workspace
+WORKDIR /workspace
+
+RUN pip3 --disable-pip-version-check --no-cache-dir install --use-pep517 -r /tmp/pip-tmp/requirements.txt && rm -rf /tmp/pip-tmp
+   
+CMD ["flask","run","--host=0.0.0.0"]

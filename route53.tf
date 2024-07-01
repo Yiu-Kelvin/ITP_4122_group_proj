@@ -1,5 +1,6 @@
 resource "aws_acm_certificate" "cert" {
   domain_name       = "school.pikaamail.com"
+  subject_alternative_names = ["myportal.pikaamail.com"]
   validation_method = "DNS"
 
   lifecycle {

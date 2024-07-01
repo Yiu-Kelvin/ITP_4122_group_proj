@@ -3,7 +3,40 @@ variable "cluster_name" {
   type    = string
   default = "school-cluster"
 }
+variable "app_username" {
+  type    = string
+  default = "admin"
+}
 
+variable "app_password" {
+  type    = string
+  default = "aA!12345678"
+  sensitive = true
+}
+variable "db_name" {
+  type    = string
+  default = "school_database"
+}
+
+variable "db_username" {
+  type    = string
+  default = "admin"
+  sensitive = true
+}
+
+variable "db_password" {
+  type    = string
+  default = "school_password"
+  sensitive = true
+}
+
+variable "MICRO_CLIENT_ID" {
+  type    = string
+}
+
+variable "MICRO_CLIENT_SECRET" {
+  type    = string
+}
 variable "vpc_name" {
   type    = string
   default = "school-vpc"
@@ -18,7 +51,10 @@ variable "vpc_cidr" {
   type    = string
   default = "10.123.0.0/16"
 }
-
+variable "efs_id" {
+  type    = string
+  default = "fs-09c9468d49fe81195"
+}
 variable "vpc_azs" {
   type    = list(string)
   default = ["us-east-1a", "us-east-1b", "us-east-1c"]
