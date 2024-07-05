@@ -159,7 +159,7 @@ resource "helm_release" "myportal" {
   repository = "oci://registry-1.docker.io/yiukelvin2005"
   chart      = "myportal_chart"
   timeout    = 600
-  values = [templatefile("myportal_value.yaml", {
+  values = [templatefile("myportal_value.yaml", { 
     db_endpoint  = "${aws_rds_cluster.school_db.endpoint}"
     db_username  = "${var.db_username}"
     db_password  = "${var.db_password}"

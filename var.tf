@@ -37,29 +37,24 @@ variable "MICRO_CLIENT_ID" {
 variable "MICRO_CLIENT_SECRET" {
   type    = string
 }
-variable "vpc_name" {
-  type    = string
-  default = "school-vpc"
-}
 
 variable "region" {
   type    = string
   default = "us-east-1"
 }
 
+variable "vpc_name" {
+  type    = string
+  default = "school-vpc"
+}
 variable "vpc_cidr" {
   type    = string
   default = "10.123.0.0/16"
-}
-variable "efs_id" {
-  type    = string
-  default = "fs-09c9468d49fe81195"
 }
 variable "vpc_azs" {
   type    = list(string)
   default = ["us-east-1a", "us-east-1b", "us-east-1c"]
 }
-
 variable "subnets" {
   type = map(list(string))
   default = {
@@ -67,4 +62,9 @@ variable "subnets" {
     "private_subnets" = ["10.123.3.0/24", "10.123.4.0/24"],
     "intra_subnets"   = ["10.123.5.0/24", "10.123.6.0/24", "10.123.7.0/24"]
   }
+}
+
+variable "efs_id" {
+  type    = string
+  default = "fs-09c9468d49fe81195"
 }
