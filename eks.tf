@@ -71,3 +71,10 @@ resource "aws_eks_access_entry" "access_entry" {
   kubernetes_groups = ["storage.k8s.io"]
   type              = "STANDARD"
 }
+
+
+resource "time_sleep" "wait_for_eks_access" {
+  depends_on = [aws_eks_access_policy_association.admin, aws_eks_access_policy_association.cluster_admin, aws_eks_access_entry.access_entry]
+
+  create_duration = "30s"
+}

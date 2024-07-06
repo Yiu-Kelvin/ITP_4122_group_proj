@@ -16,18 +16,17 @@ resource "aws_rds_cluster" "school_db" {
 
   master_password = var.db_password
   master_username = var.db_username
-  database_name = var.db_name
+  database_name   = var.db_name
 
-  snapshot_identifier = data.aws_db_cluster_snapshot.snapshot.id
+  snapshot_identifier = "doneeeeeeeeeeeeeeeeee"
   serverlessv2_scaling_configuration {
     max_capacity = 1.0
     min_capacity = 0.5
   }
   lifecycle {
     create_before_destroy = true
-  
-  }
 
+  }
 }
 
 resource "aws_db_subnet_group" "main" {

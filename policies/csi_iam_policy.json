@@ -30,6 +30,14 @@
             "aws:ResourceTag/efs.csi.aws.com/cluster": "true"
           }
         }
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ],
+        "Resource": "*"
       }
     ]
   }

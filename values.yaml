@@ -6,16 +6,13 @@ global:
 mariadb:
   enabled: false
 volumePermissions:
-  enabled: true
+  enabled: false
 persistence:
   enabled: true
   accessMode: ReadWriteMany
   existingClaim: efs-claim 
-# args: ["-c", "while true; do echo $(date -u) >> /bitnami/moodle/out1.txt; sleep 5; done"]
-# command: ["/bin/bash"]
 image:
   debug: true
-
 externalDatabase:
   type: auroramysql
   host: "${db_endpoint}"
@@ -34,7 +31,13 @@ service:
   # annotations: 
   #   service.beta.kubernetes.io/aws-load-balancer-type: alb
 resourcePreset: large
-replicaCount: 3
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 5
+  targetCPU: 80
+  targetMemory: 80
+
 ingress:
   enabled: true
   hostname: "school.pikaamail.com"
@@ -56,8 +59,3 @@ ingress:
               name: myportal-service
               port:
                 number: 443
-readinessProbe:
-  enabled: false
-
-livenessProbe:
-  enabled: false

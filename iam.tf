@@ -93,3 +93,4 @@ resource "aws_iam_role_policy_attachment" "alb-ingress-controller-role-AmazonEKS
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
   depends_on = [aws_iam_role.ALBIngressControllerRole]
 }
+

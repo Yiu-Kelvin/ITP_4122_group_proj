@@ -30,7 +30,7 @@ app.config['OAUTH2_PROVIDERS'] = {
             'url': 'https://graph.microsoft.com/oidc/userinfo',
             'email': lambda json: json['email'],
         },
-        'scopes': ['https://graph.microsoft.com/email'],
+        'scopes': ['https://graph.microsoft.com/User.Read'],
     },
 
     # GitHub OAuth 2.0 documentation:

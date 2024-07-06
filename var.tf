@@ -9,8 +9,8 @@ variable "app_username" {
 }
 
 variable "app_password" {
-  type    = string
-  default = "aA!12345678"
+  type      = string
+  default   = "aA!12345678"
   sensitive = true
 }
 variable "db_name" {
@@ -19,23 +19,23 @@ variable "db_name" {
 }
 
 variable "db_username" {
-  type    = string
-  default = "admin"
+  type      = string
+  default   = "admin"
   sensitive = true
 }
 
 variable "db_password" {
-  type    = string
-  default = "school_password"
+  type      = string
+  default   = "school_password"
   sensitive = true
 }
 
 variable "MICRO_CLIENT_ID" {
-  type    = string
+  type = string
 }
 
 variable "MICRO_CLIENT_SECRET" {
-  type    = string
+  type = string
 }
 
 variable "region" {
