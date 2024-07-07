@@ -1,4 +1,10 @@
 terraform {
+
+  backend "s3" {
+    bucket = "terraform-state-0yqvjk6vls36nxe5kovq5rqabaof5zr9"
+    key = "itp4122project/terraform.tfstate"
+    region = "us-east-1"
+  }
   required_providers {
     kubectl = {
       source  = "gavinbunney/kubectl"

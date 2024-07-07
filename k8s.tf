@@ -15,6 +15,30 @@ provider "kubectl" {
   token                  = data.aws_eks_cluster_auth.this.token
 }
 
+provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+  token                  = data.aws_eks_cluster_auth.this.token
+}
+data "aws_secretsmanager_secret" "secrets" {
+  arn = "arn:aws:secretsmanager:us-east-1:891377140475:secret:myportal-yiD0AH"
+}
+data "aws_secretsmanager_secret_version" "current" {
+  secret_id = data.aws_secretsmanager_secret.secrets.id
+}
+
+resource "kubernetes_secret" "myportal_secret" {
+  metadata {
+    name = "myportal-secret"
+  }
+
+  data = {
+    MICRO_CLIENT_ID = jsondecode(data.aws_secretsmanager_secret_version.current.secret_string)["MICRO_CLIENT_ID"]
+    MICRO_CLIENT_SECRET = jsondecode(data.aws_secretsmanager_secret_version.current.secret_string)["MICRO_CLIENT_SECRET"]
+  }
+  
+}
+
 resource "kubectl_manifest" "efs_storage_class" {
   yaml_body = <<YAML
 kind: StorageClass
@@ -24,7 +48,7 @@ metadata:
 provisioner: efs.csi.aws.com
 YAML
 
-  depends_on = [time_sleep.wait_for_eks_access]
+  depends_on = [module.eks]
 }
 
 resource "kubectl_manifest" "efs_pv" {
@@ -46,7 +70,7 @@ spec:
     volumeHandle: ${var.efs_id}
 YAML
 
-  depends_on = [time_sleep.wait_for_eks_access, kubectl_manifest.efs_storage_class]
+  depends_on = [module.eks, kubectl_manifest.efs_storage_class]
 
 }
 
@@ -64,19 +88,19 @@ spec:
     requests:
       storage: 5Gi
 YAML
-  depends_on = [time_sleep.wait_for_eks_access, kubectl_manifest.efs_pv]
+  depends_on = [module.eks, kubectl_manifest.efs_pv]
 
 }
 
 resource "kubectl_manifest" "cluster_role" {
   yaml_body  = file("${path.root}/rbac/clusterRole.yaml")
-  depends_on = [time_sleep.wait_for_eks_access]
+  depends_on = [module.eks]
 
 }
 
 resource "kubectl_manifest" "cluster_role_binding" {
   yaml_body  = file("${path.root}/rbac/clusterRoleBinding.yaml")
-  depends_on = [time_sleep.wait_for_eks_access]
+  depends_on = [module.eks]
 
 }
 
@@ -85,7 +109,7 @@ resource "kubectl_manifest" "alb_ingress_controller_service_account" {
     alb_ingress_controller_iam_role_arn = "${aws_iam_role.ALBIngressControllerRole.arn}"
   })
 
-  depends_on = [time_sleep.wait_for_eks_access]
+  depends_on = [module.eks]
 
 }
 resource "kubectl_manifest" "ingressClass" {
@@ -97,7 +121,7 @@ metadata:
 spec:
   controller: ingress.k8s.aws/alb  
 YAML
-  depends_on = [time_sleep.wait_for_eks_access]
+  depends_on = [module.eks]
 }
 resource "helm_release" "aws-load-balancer-controller" {
   name       = "aws-load-balancer-controller"
@@ -177,9 +201,7 @@ resource "helm_release" "myportal" {
     db_username         = "${var.db_username}"
     db_password         = "${var.db_password}"
     db_name             = "${var.db_name}"
-    MICRO_CLIENT_ID     = "${var.MICRO_CLIENT_ID}"
-    MICRO_CLIENT_SECRET = "${var.MICRO_CLIENT_SECRET}"
   })]
 
-  depends_on = [time_sleep.wait_for_eks_access, kubectl_manifest.efs_pvc, module.eks]
+  depends_on = [time_sleep.wait_for_eks_access, kubectl_manifest.efs_pvc, module.eks, kubernetes_secret.myportal_secret]
 }

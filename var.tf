@@ -30,14 +30,6 @@ variable "db_password" {
   sensitive = true
 }
 
-variable "MICRO_CLIENT_ID" {
-  type = string
-}
-
-variable "MICRO_CLIENT_SECRET" {
-  type = string
-}
-
 variable "region" {
   type    = string
   default = "us-east-1"

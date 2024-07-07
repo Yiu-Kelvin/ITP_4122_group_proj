@@ -19,14 +19,14 @@ spec:
         env:
           - name: MICRO_CLIENT_ID
             valueFrom:
-              configMapKeyRef:
-                name: {{.Release.Name }}-configmap
+              secretKeyRef:
+                name: myportal-secret
                 key: MICRO_CLIENT_ID
                 
           - name: MICRO_CLIENT_SECRET
             valueFrom:
-              configMapKeyRef:
-                name: {{.Release.Name }}-configmap
+              secretKeyRef:
+                name: myportal-secret
                 key: MICRO_CLIENT_SECRET
                 
           - name: SQLALCHEMY_DATABASE_URI

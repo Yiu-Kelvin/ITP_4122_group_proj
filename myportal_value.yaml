@@ -1,6 +1,4 @@
 env: 
-  MICRO_CLIENT_ID: "${MICRO_CLIENT_ID}"
-  MICRO_CLIENT_SECRET: "${MICRO_CLIENT_SECRET}"
   SQLALCHEMY_DATABASE_URI: "mysql+pymysql://${db_username}:${db_password}@${db_endpoint}/${db_name}"
   DEBUG: "True"
   REDIRECT_URL: "https://myportal.pikaamail.com/callback"
