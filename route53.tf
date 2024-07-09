@@ -23,3 +23,21 @@ resource "aws_route53_record" "moodle" {
   type            = each.value.type
   zone_id         = "Z0111437GSSD0Z667NKN"
 }
+
+resource "aws_route53_record" "myportal-load-balancer" {
+  zone_id = "Z0111437GSSD0Z667NKN"
+  name    = "myportal.pikaamail.com"
+  type    = "CNAME"
+  ttl     = "300"
+
+  records = [data.kubernetes_resources.ingress.objects.0.status.loadBalancer.ingress.0.hostname]
+}
+
+resource "aws_route53_record" "moodle-load-balancer" {
+  zone_id = "Z0111437GSSD0Z667NKN"
+  name    = "school.pikaamail.com"
+  type    = "CNAME"
+  ttl     = "300"
+
+  records = [data.kubernetes_resources.ingress.objects.0.status.loadBalancer.ingress.0.hostname]
+}

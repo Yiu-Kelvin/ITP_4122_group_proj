@@ -34,8 +34,8 @@ resourcePreset: large
 autoscaling:
   enabled: true
   minReplicas: 3
-  maxReplicas: 5
-  targetCPU: 80
+  maxReplicas: 4
+  targetCPU: 30
   targetMemory: 80
 
 ingress:
@@ -59,3 +59,10 @@ ingress:
               name: myportal-service
               port:
                 number: 443
+startupProbe:
+  enabled: true
+  initialDelaySeconds: 120
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 200
+  successThreshold: 1
